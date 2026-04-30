@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Obligaciones | Seguimiento de Pagos Musicala</title>
+  <meta name="theme-color" content="#faf7ff" />
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <section id="loginView" class="login-view">
+    <div class="login-card">
+      <img src="assets/logo.png" alt="Logo Musicala" class="login-logo" />
+      <h1>Obligaciones Musicala</h1>
+      <p>Inicia sesion para administrar el radar mensual.</p>
+      <button id="btnLogin" class="btn btn-primary" type="button">Ingresar con Google</button>
+      <div id="loginMessage" class="muted"></div>
+    </div>
+  </section>
+
+  <div id="appView" class="app-shell is-hidden">
+    <header class="topbar">
+      <a class="brand" href="index.html">
+        <img src="assets/logo.png" alt="Logo Musicala" />
+        <div>
+          <span>Musicala</span>
+          <strong>Obligaciones</strong>
+        </div>
+      </a>
+      <nav class="top-actions">
+        <a class="btn btn-ghost" href="index.html">Dashboard</a>
+        <span id="userLabel" class="user-label"></span>
+        <button id="btnLogout" class="btn btn-ghost" type="button">Salir</button>
+      </nav>
+    </header>
+
+    <main class="page">
+      <section class="toolbar">
+        <div>
+          <p class="eyebrow">Base recurrente</p>
+          <h1>Obligaciones fijas y frecuentes</h1>
+        </div>
+        <button id="btnNew" class="btn btn-primary" type="button">Nueva obligacion</button>
+      </section>
+
+      <section class="panel">
+        <div class="filters">
+          <input id="searchInput" class="control" type="search" placeholder="Buscar por nombre o categoria" />
+          <select id="activeFilter" class="control">
+            <option value="">Activas e inactivas</option>
+            <option value="true">Solo activas</option>
+            <option value="false">Solo inactivas</option>
+          </select>
+          <select id="categoryFilter" class="control"><option value="">Todas las categorias</option></select>
+        </div>
+        <div id="statusLine" class="status-line">Cargando...</div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Categoria</th>
+                <th>Vence</th>
+                <th>Valor</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="obligationsBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="obligationDialog" class="dialog">
+    <form id="obligationForm" method="dialog">
+      <h2 id="dialogTitle">Obligacion</h2>
+      <input type="hidden" id="obligationId" />
+      <div class="form-grid">
+        <label>Nombre <input id="name" class="control" required /></label>
+        <label>Categoria <input id="category" class="control" list="categoryOptions" /></label>
+        <label>Frecuencia
+          <select id="frequency" class="control">
+            <option value="monthly">Mensual</option>
+            <option value="annual">Anual</option>
+            <option value="custom">Meses especificos</option>
+          </select>
+        </label>
+        <label>Dia limite <input id="dueDay" class="control" type="number" min="1" max="31" value="1" /></label>
+        <label>Meses aplica <input id="monthsApply" class="control" placeholder="Ej: 1,4,7,10 o vacio para todos" /></label>
+        <label>Valor estimado <input id="estimatedValue" class="control" type="number" min="0" step="1" /></label>
+        <label>Metodo de pago <input id="paymentMethod" class="control" /></label>
+        <label>Proveedor <input id="provider" class="control" /></label>
+        <label>Prioridad
+          <select id="priority" class="control">
+            <option>Alta</option>
+            <option>Media</option>
+            <option>Normal</option>
+          </select>
+        </label>
+        <label>Estado
+          <select id="active" class="control">
+            <option value="true">Activa</option>
+            <option value="false">Inactiva</option>
+          </select>
+        </label>
+        <label class="full">Notas <textarea id="notes" class="control" rows="3"></textarea></label>
+      </div>
+      <datalist id="categoryOptions"></datalist>
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" value="cancel" type="button" data-close-dialog>Cancelar</button>
+        <button class="btn btn-primary" value="default" type="submit">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast"></div>
+  <script type="module" src="obligations.js"></script>
+</body>
+</html>

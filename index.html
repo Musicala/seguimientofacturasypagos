@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Seguimiento de Pagos Musicala</title>
+  <meta name="description" content="Radar mensual de pagos y obligaciones de Musicala." />
+  <meta name="theme-color" content="#faf7ff" />
+  <link rel="icon" href="assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <section id="loginView" class="login-view">
+    <div class="login-card">
+      <img src="assets/logo.png" alt="Logo Musicala" class="login-logo" />
+      <h1>Seguimiento de Pagos Musicala</h1>
+      <p>Radar mensual para no olvidar obligaciones importantes.</p>
+      <button id="btnLogin" class="btn btn-primary" type="button">Ingresar con Google</button>
+      <div id="loginMessage" class="muted"></div>
+    </div>
+  </section>
+
+  <div id="appView" class="app-shell is-hidden">
+    <header class="topbar">
+      <a class="brand" href="index.html">
+        <img src="assets/logo.png" alt="Logo Musicala" />
+        <div>
+          <span>Musicala</span>
+          <strong>Seguimiento de Pagos Musicala</strong>
+        </div>
+      </a>
+      <nav class="top-actions">
+        <a class="btn btn-ghost" href="obligaciones.html">Obligaciones</a>
+        <span id="userLabel" class="user-label"></span>
+        <button id="btnLogout" class="btn btn-ghost" type="button">Salir</button>
+      </nav>
+    </header>
+
+    <main class="page">
+      <section class="toolbar">
+        <div>
+          <p class="eyebrow">Radar mensual</p>
+          <h1>Pagos y obligaciones del mes</h1>
+        </div>
+        <div class="toolbar-actions">
+          <select id="monthSelect" class="control"></select>
+          <select id="yearSelect" class="control"></select>
+          <button id="btnGenerate" class="btn btn-secondary" type="button">Generar pagos del mes</button>
+          <button id="btnRefresh" class="btn btn-primary" type="button">Actualizar</button>
+        </div>
+      </section>
+
+      <section class="kpi-grid">
+        <article class="kpi"><span>Total estimado</span><strong id="kpiEstimated">$0</strong></article>
+        <article class="kpi"><span>Total pagado</span><strong id="kpiPaid">$0</strong></article>
+        <article class="kpi"><span>Total pendiente</span><strong id="kpiPending">$0</strong></article>
+        <article class="kpi danger"><span>Vencidos</span><strong id="kpiOverdue">0</strong></article>
+        <article class="kpi warning"><span>Urgentes</span><strong id="kpiUrgent">0</strong></article>
+        <article class="kpi info"><span>Proximos</span><strong id="kpiUpcoming">0</strong></article>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Alertas</p>
+            <h2>Lo que necesita atencion</h2>
+          </div>
+        </div>
+        <div id="alertsList" class="alerts-list"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">Pagos del mes</p>
+            <h2 id="periodTitle">Mes activo</h2>
+          </div>
+        </div>
+
+        <div class="filters">
+          <input id="searchInput" class="control" type="search" placeholder="Buscar por nombre, categoria o responsable" />
+          <select id="statusFilter" class="control">
+            <option value="">Todos los estados</option>
+            <option value="pending">Pendiente</option>
+            <option value="upcoming">Proximo</option>
+            <option value="urgent">Urgente</option>
+            <option value="overdue">Vencido</option>
+            <option value="scheduled">Programado</option>
+            <option value="paid">Pagado</option>
+            <option value="not_applicable">No aplica</option>
+          </select>
+          <select id="categoryFilter" class="control"><option value="">Todas las categorias</option></select>
+          <select id="responsibleFilter" class="control"><option value="">Todos los responsables</option></select>
+        </div>
+
+        <div id="statusLine" class="status-line">Cargando...</div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Obligacion</th>
+                <th>Responsable</th>
+                <th>Fecha limite</th>
+                <th>Valor</th>
+                <th>Estado</th>
+                <th>Detalle</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="paymentsBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="paymentDialog" class="dialog">
+    <form id="paymentForm" method="dialog">
+      <h2 id="paymentDialogTitle">Registrar pago</h2>
+      <input type="hidden" id="paymentId" />
+      <div class="form-grid">
+        <label>Fecha de pago <input id="paidAt" class="control" type="date" required /></label>
+        <label>Valor pagado <input id="paidValue" class="control" type="number" min="0" step="1" /></label>
+        <label>Metodo <select id="paymentMethod" class="control"></select></label>
+        <label>Comprobante URL <input id="receiptUrl" class="control" type="url" placeholder="https://..." /></label>
+        <label class="full">Nota <textarea id="paymentNotes" class="control" rows="3"></textarea></label>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" value="cancel" type="button" data-close-dialog>Cancelar</button>
+        <button class="btn btn-primary" value="default" type="submit">Guardar pago</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="editDialog" class="dialog">
+    <form id="editForm" method="dialog">
+      <h2>Editar pago mensual</h2>
+      <input type="hidden" id="editPaymentId" />
+      <div class="form-grid">
+        <label>Nombre <input id="editName" class="control" required /></label>
+        <label>Responsable <input id="editResponsible" class="control" /></label>
+        <label>Fecha limite <input id="editDueDate" class="control" type="date" /></label>
+        <label>Valor estimado <input id="editEstimatedValue" class="control" type="number" min="0" step="1" /></label>
+        <label class="full">Nota <textarea id="editNotes" class="control" rows="3"></textarea></label>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" value="cancel" type="button" data-close-dialog>Cancelar</button>
+        <button class="btn btn-primary" value="default" type="submit">Guardar cambios</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
