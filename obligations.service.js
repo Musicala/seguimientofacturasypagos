@@ -15,7 +15,9 @@ const COLLECTION = "obligations";
 
 export async function listObligations() {
   const snap = await getDocs(query(collection(db, COLLECTION), orderBy("name")));
-  return snap.docs.map((item) => ({ id: item.id, ...item.data() }));
+  return snap.docs
+    .map((item) => ({ id: item.id, ...item.data() }))
+    .filter((item) => !item.deletedAt);
 }
 
 export async function saveObligation(payload, user) {
@@ -38,6 +40,7 @@ export async function saveObligation(payload, user) {
     active: payload.active !== false,
     receiptRequired: true,
     notes: payload.notes || "",
+    deletedAt: deleteField(),
     updatedAt: now,
     updatedBy: user?.email || ""
   };
@@ -60,7 +63,18 @@ export async function setObligationActive(id, active, user) {
   });
 }
 
+export async function deleteObligation(id, user) {
+  await updateDoc(doc(db, COLLECTION, id), {
+    active: false,
+    deletedAt: serverTimestamp(),
+    deletedBy: user?.email || "",
+    updatedAt: serverTimestamp(),
+    updatedBy: user?.email || ""
+  });
+}
+
 export function appliesToMonth(obligation, month, year = new Date().getFullYear()) {
+  if (obligation.deletedAt) return false;
   if (!obligation.active) return false;
   if (!appliesToYear(obligation, year)) return false;
   const months = normalizeMonths(obligation.monthsApply);

@@ -153,6 +153,11 @@ button, input, select, textarea { font: inherit; }
   border: 1px solid var(--line);
 }
 
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
 .btn-small {
   min-height: 34px;
   padding: 0.45rem 0.65rem;
@@ -317,6 +322,10 @@ button, input, select, textarea { font: inherit; }
 }
 
 .dialog h2 { margin-top: 0; }
+
+.dialog-small {
+  width: min(460px, calc(100vw - 2rem));
+}
 
 .form-grid {
   display: grid;

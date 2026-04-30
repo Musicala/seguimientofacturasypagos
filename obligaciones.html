@@ -121,6 +121,18 @@
     </form>
   </dialog>
 
+  <dialog id="confirmDeleteDialog" class="dialog dialog-small">
+    <form id="confirmDeleteForm" method="dialog">
+      <h2>Eliminar item</h2>
+      <input type="hidden" id="confirmDeleteId" />
+      <p class="muted">Vas a eliminar <strong id="deleteItemName"></strong> de la lista de obligaciones. No se volvera a generar en proximos meses.</p>
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" value="cancel" type="button" data-close-dialog>Cancelar</button>
+        <button class="btn btn-danger" value="default" type="submit">Eliminar</button>
+      </div>
+    </form>
+  </dialog>
+
   <div id="toast" class="toast"></div>
   <script type="module" src="obligations.js"></script>
 </body>

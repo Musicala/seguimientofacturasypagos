@@ -1,7 +1,7 @@
 import { APP_CONFIG } from "./config.js";
 import { state, canEdit } from "./state.js";
 import { getAuthorizedProfile, loginWithGoogle, logout, watchAuth } from "./firebase.service.js";
-import { listObligations, saveObligation, setObligationActive } from "./obligations.service.js";
+import { deleteObligation, listObligations, saveObligation, setObligationActive } from "./obligations.service.js";
 
 const $ = (selector) => document.querySelector(selector);
 const els = {
@@ -18,8 +18,12 @@ const els = {
   statusLine: $("#statusLine"),
   obligationsBody: $("#obligationsBody"),
   dialog: $("#obligationDialog"),
+  confirmDialog: $("#confirmDeleteDialog"),
   form: $("#obligationForm"),
+  confirmForm: $("#confirmDeleteForm"),
   dialogTitle: $("#dialogTitle"),
+  deleteItemName: $("#deleteItemName"),
+  confirmDeleteId: $("#confirmDeleteId"),
   id: $("#obligationId"),
   name: $("#name"),
   category: $("#category"),
@@ -114,6 +118,7 @@ function render() {
       <td class="actions">
         <button class="btn btn-small btn-ghost" data-action="edit" data-id="${escapeAttr(item.id)}" ${!canEdit() ? "disabled" : ""}>Editar</button>
         <button class="btn btn-small btn-primary" data-action="toggle" data-id="${escapeAttr(item.id)}" ${!canEdit() ? "disabled" : ""}>${item.active ? "Inactivar" : "Activar"}</button>
+        <button class="btn btn-small btn-danger" data-action="delete" data-id="${escapeAttr(item.id)}" ${!canEdit() ? "disabled" : ""}>Eliminar</button>
       </td>
     </tr>
   `).join("");
@@ -198,6 +203,7 @@ async function handleTableClick(event) {
   const item = state.obligations.find((obligation) => obligation.id === button.dataset.id);
   if (!item) return;
   if (button.dataset.action === "edit") return openEdit(item);
+  if (button.dataset.action === "delete") return openDeleteConfirm(item);
   if (button.dataset.action === "toggle") {
     try {
       await setObligationActive(item.id, !item.active, state.user);
@@ -207,6 +213,27 @@ async function handleTableClick(event) {
     }
   }
 }
+
+function openDeleteConfirm(item) {
+  els.confirmDeleteId.value = item.id;
+  els.deleteItemName.textContent = item.name || "este item";
+  els.confirmDialog.showModal();
+}
+
+els.confirmForm?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const id = els.confirmDeleteId.value;
+  if (!id) return;
+
+  try {
+    await deleteObligation(id, state.user);
+    els.confirmDialog.close();
+    showToast("Item eliminado.");
+    await loadObligations();
+  } catch (error) {
+    showError(error);
+  }
+});
 
 function populateFilters() {
   fillSelect(els.categoryFilter, unique(state.obligations.map((item) => item.category).filter(Boolean)), "Todas las categorias");
