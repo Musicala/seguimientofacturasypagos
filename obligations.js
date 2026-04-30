@@ -26,6 +26,8 @@ const els = {
   frequency: $("#frequency"),
   dueDay: $("#dueDay"),
   monthsApply: $("#monthsApply"),
+  intervalYears: $("#intervalYears"),
+  startYear: $("#startYear"),
   estimatedValue: $("#estimatedValue"),
   paymentMethod: $("#paymentMethod"),
   provider: $("#provider"),
@@ -64,6 +66,7 @@ function bindEvents() {
   els.btnLogin?.addEventListener("click", () => loginWithGoogle().catch(showError));
   els.btnLogout?.addEventListener("click", logout);
   els.btnNew?.addEventListener("click", openCreate);
+  els.frequency?.addEventListener("change", updateFrequencyFields);
   [els.searchInput, els.activeFilter, els.categoryFilter].forEach((el) => {
     el?.addEventListener("input", () => {
       state.filters.search = els.searchInput.value.trim().toLowerCase();
@@ -105,7 +108,7 @@ function render() {
     <tr>
       <td><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.provider || item.paymentMethod || "")}</small></td>
       <td>${escapeHtml(item.category || "-")}</td>
-      <td>Dia ${escapeHtml(item.dueDay || "-")}<small>${monthsText(item.monthsApply)}</small></td>
+      <td>Dia ${escapeHtml(item.dueDay || "-")}<small>${scheduleText(item)}</small></td>
       <td>${money(item.estimatedValue)}</td>
       <td><span class="badge ${item.active ? "paid" : "pending"}">${item.active ? "Activa" : "Inactiva"}</span></td>
       <td class="actions">
@@ -133,7 +136,10 @@ function openCreate() {
   els.active.value = "true";
   els.priority.value = "Normal";
   els.frequency.value = "monthly";
+  els.intervalYears.value = "1";
+  els.startYear.value = new Date().getFullYear();
   els.dialogTitle.textContent = "Nueva obligacion";
+  updateFrequencyFields();
   els.dialog.showModal();
 }
 
@@ -144,6 +150,8 @@ function openEdit(item) {
   els.frequency.value = item.frequency || "monthly";
   els.dueDay.value = item.dueDay || 1;
   els.monthsApply.value = Array.isArray(item.monthsApply) ? item.monthsApply.join(",") : "";
+  els.intervalYears.value = item.intervalYears || 1;
+  els.startYear.value = item.startYear || new Date().getFullYear();
   els.estimatedValue.value = item.estimatedValue || "";
   els.paymentMethod.value = item.paymentMethod || "";
   els.provider.value = item.provider || "";
@@ -151,6 +159,7 @@ function openEdit(item) {
   els.active.value = item.active === false ? "false" : "true";
   els.notes.value = item.notes || "";
   els.dialogTitle.textContent = "Editar obligacion";
+  updateFrequencyFields();
   els.dialog.showModal();
 }
 
@@ -165,6 +174,8 @@ async function handleSubmit(event) {
       frequency: els.frequency.value,
       dueDay: els.dueDay.value,
       monthsApply: els.monthsApply.value,
+      intervalYears: els.frequency.value === "annual" ? els.intervalYears.value : 1,
+      startYear: els.frequency.value === "annual" ? els.startYear.value : new Date().getFullYear(),
       estimatedValue: els.estimatedValue.value,
       paymentMethod: els.paymentMethod.value,
       provider: els.provider.value,
@@ -211,6 +222,18 @@ function fillSelect(select, values, label) {
   if (values.includes(current)) select.value = current;
 }
 
+function updateFrequencyFields() {
+  const isAnnual = els.frequency.value === "annual";
+  document.querySelectorAll(".yearly-only").forEach((field) => {
+    field.classList.toggle("is-hidden", !isAnnual);
+  });
+
+  if (!isAnnual) {
+    els.intervalYears.value = "1";
+    els.startYear.value = new Date().getFullYear();
+  }
+}
+
 function showLogin(message = "") {
   els.loginView.classList.remove("is-hidden");
   els.appView.classList.add("is-hidden");
@@ -222,6 +245,15 @@ function showApp() {
   els.appView.classList.remove("is-hidden");
   els.userLabel.textContent = `${state.profile.name || state.profile.email} · ${state.profile.role}`;
   els.btnNew.disabled = !canEdit();
+}
+
+function scheduleText(item) {
+  const parts = [monthsText(item.monthsApply)];
+  const interval = Number(item.intervalYears || 1);
+  if (interval > 1) {
+    parts.push(`Cada ${interval} años desde ${item.startYear || new Date().getFullYear()}`);
+  }
+  return parts.join(" · ");
 }
 
 function monthsText(months) {

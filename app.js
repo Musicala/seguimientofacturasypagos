@@ -19,7 +19,6 @@ const els = {
   userLabel: $("#userLabel"),
   monthSelect: $("#monthSelect"),
   yearSelect: $("#yearSelect"),
-  btnGenerate: $("#btnGenerate"),
   btnRefresh: $("#btnRefresh"),
   searchInput: $("#searchInput"),
   statusFilter: $("#statusFilter"),
@@ -92,7 +91,6 @@ function bindEvents() {
   els.btnLogin?.addEventListener("click", () => loginWithGoogle().catch(showError));
   els.btnLogout?.addEventListener("click", () => logout());
   els.btnRefresh?.addEventListener("click", loadPayments);
-  els.btnGenerate?.addEventListener("click", generateAndReload);
   els.monthSelect?.addEventListener("change", () => {
     state.selectedMonth = Number(els.monthSelect.value);
     loadPayments();
@@ -118,23 +116,12 @@ function bindEvents() {
   });
 }
 
-async function generateAndReload() {
-  if (!canEdit()) return showToast("Tu rol solo permite lectura.", "error");
-  setBusy(true, "Generando pagos...");
-  try {
-    const result = await generateMonthlyPayments(state.selectedYear, state.selectedMonth, state.user);
-    showToast(`Generados: ${result.created}. Ya existian: ${result.existing}.`);
-    await loadPayments();
-  } catch (error) {
-    showError(error);
-  } finally {
-    setBusy(false);
-  }
-}
-
 async function loadPayments() {
   setBusy(true, "Cargando pagos...");
   try {
+    if (canEdit()) {
+      await generateMonthlyPayments(state.selectedYear, state.selectedMonth, state.user);
+    }
     state.payments = await listMonthlyPayments(state.selectedYear, state.selectedMonth);
     populateFilters();
     render();
@@ -159,7 +146,7 @@ function render() {
   renderTable(items);
   els.statusLine.textContent = state.payments.length
     ? `Mostrando ${items.length} de ${state.payments.length} pagos.`
-    : "No hay pagos para este mes. Usa Generar pagos del mes.";
+    : "No hay pagos para este mes.";
 }
 
 function renderAlerts() {
@@ -176,7 +163,7 @@ function renderAlerts() {
   els.alertsList.innerHTML = ordered.map((p) => `
     <article class="alert-card ${p.computedStatus}">
       <strong>${escapeHtml(label(p.computedStatus))}: ${escapeHtml(p.name)}</strong>
-      <span>${escapeHtml(p.responsible || "Sin responsable")} · vence ${formatDate(p.dueDate)} · ${money(p.estimatedValue)}</span>
+      <span>vence ${formatDate(p.dueDate)} · ${money(p.estimatedValue)}</span>
     </article>
   `).join("");
 }

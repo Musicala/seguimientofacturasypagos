@@ -29,6 +29,8 @@ export async function saveObligation(payload, user) {
     frequency: payload.frequency || "monthly",
     dueDay: Number(payload.dueDay || 1),
     monthsApply: normalizeMonths(payload.monthsApply),
+    intervalYears: Math.max(Number(payload.intervalYears || 1), 1),
+    startYear: Number(payload.startYear || new Date().getFullYear()),
     estimatedValue: Number(payload.estimatedValue || 0),
     paymentMethod: payload.paymentMethod || "",
     provider: payload.provider || "",
@@ -58,10 +60,19 @@ export async function setObligationActive(id, active, user) {
   });
 }
 
-export function appliesToMonth(obligation, month) {
+export function appliesToMonth(obligation, month, year = new Date().getFullYear()) {
   if (!obligation.active) return false;
+  if (!appliesToYear(obligation, year)) return false;
   const months = normalizeMonths(obligation.monthsApply);
   return !months.length || months.includes(Number(month));
+}
+
+function appliesToYear(obligation, year) {
+  const interval = Math.max(Number(obligation.intervalYears || 1), 1);
+  if (interval <= 1) return true;
+
+  const startYear = Number(obligation.startYear || year);
+  return Number(year) >= startYear && (Number(year) - startYear) % interval === 0;
 }
 
 function normalizeMonths(value) {

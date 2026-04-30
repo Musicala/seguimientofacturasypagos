@@ -32,7 +32,7 @@ export async function generateMonthlyPayments(year, month, user) {
   let created = 0;
   let existing = 0;
 
-  for (const obligation of obligations.filter((item) => appliesToMonth(item, month))) {
+  for (const obligation of obligations.filter((item) => appliesToMonth(item, month, year))) {
     const id = `${period}_${obligation.id}`;
     const ref = doc(db, COLLECTION, id);
     const snap = await getDoc(ref);
