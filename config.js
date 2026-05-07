@@ -17,6 +17,12 @@ export const APP_CONFIG = {
     messagingSenderId: "50552409806",
     appId: "1:50552409806:web:f1897076748768f31aca9f"
   },
+  notifications: {
+    enabled: true,
+    appsScriptUrl: "https://script.google.com/macros/s/AKfycbzAO3K-pVEdjhZLirygb3Xqz8I14V1YCfdAOyzUj9QzR-uf6A4puTYQIORPLWx0wrv_/exec",
+    token: "PAYMENTS_NOTIFY_TOKEN",
+    dueWindowDays: 1
+  },
   months: [
     "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
     "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"

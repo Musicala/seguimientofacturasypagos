@@ -8,6 +8,7 @@ import {
   markPaymentPaid,
   updatePayment
 } from "./payments.service.js";
+import { sendDuePaymentNotifications } from "./notifications.service.js";
 
 const $ = (selector) => document.querySelector(selector);
 const els = {
@@ -20,6 +21,7 @@ const els = {
   monthSelect: $("#monthSelect"),
   yearSelect: $("#yearSelect"),
   btnRefresh: $("#btnRefresh"),
+  btnNotifyDue: $("#btnNotifyDue"),
   searchInput: $("#searchInput"),
   statusFilter: $("#statusFilter"),
   categoryFilter: $("#categoryFilter"),
@@ -91,6 +93,7 @@ function bindEvents() {
   els.btnLogin?.addEventListener("click", () => loginWithGoogle().catch(showError));
   els.btnLogout?.addEventListener("click", () => logout());
   els.btnRefresh?.addEventListener("click", loadPayments);
+  els.btnNotifyDue?.addEventListener("click", sendDueNotifications);
   els.monthSelect?.addEventListener("change", () => {
     state.selectedMonth = Number(els.monthSelect.value);
     loadPayments();
@@ -125,6 +128,20 @@ async function loadPayments() {
     state.payments = await listMonthlyPayments(state.selectedYear, state.selectedMonth);
     populateFilters();
     render();
+  } catch (error) {
+    showError(error);
+  } finally {
+    setBusy(false);
+  }
+}
+
+async function sendDueNotifications() {
+  setBusy(true, "Enviando alerta de pagos...");
+  try {
+    const result = await sendDuePaymentNotifications();
+    showToast(result.sent
+      ? `Alerta enviada con ${result.count || 0} pago(s).`
+      : result.message || "No hay pagos por vencer hoy o manana.");
   } catch (error) {
     showError(error);
   } finally {
@@ -318,7 +335,7 @@ function showApp() {
 
 function setBusy(isBusy, message = "") {
   els.statusLine.textContent = message || els.statusLine.textContent;
-  [els.btnRefresh, els.btnGenerate].forEach((btn) => { if (btn) btn.disabled = isBusy; });
+  [els.btnRefresh, els.btnNotifyDue, els.btnGenerate].forEach((btn) => { if (btn) btn.disabled = isBusy; });
 }
 
 function label(status) {
