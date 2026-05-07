@@ -136,11 +136,11 @@ async function loadPayments() {
 }
 
 async function sendDueNotifications() {
-  setBusy(true, "Enviando alerta de pagos...");
+  setBusy(true, "Ejecutando prueba de alerta...");
   try {
     const result = await sendDuePaymentNotifications();
     showToast(result.sent
-      ? `Alerta enviada con ${result.count || 0} pago(s).`
+      ? `Prueba enviada con ${result.count || 0} pago(s).`
       : result.message || "No hay pagos por vencer hoy o manana.");
   } catch (error) {
     showError(error);
@@ -335,7 +335,7 @@ function showApp() {
 
 function setBusy(isBusy, message = "") {
   els.statusLine.textContent = message || els.statusLine.textContent;
-  [els.btnRefresh, els.btnNotifyDue, els.btnGenerate].forEach((btn) => { if (btn) btn.disabled = isBusy; });
+  [els.btnRefresh, els.btnNotifyDue].forEach((btn) => { if (btn) btn.disabled = isBusy; });
 }
 
 function label(status) {

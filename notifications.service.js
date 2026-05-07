@@ -1,5 +1,4 @@
 import { APP_CONFIG } from "./config.js";
-import { periodId } from "./payments.service.js";
 import { state } from "./state.js";
 
 const EXCLUDED_STATUSES = new Set(["paid", "not_applicable", "scheduled"]);
@@ -18,7 +17,7 @@ export function getDueNotificationPayments(payments, options = {}) {
     .map(toNotificationPayment);
 }
 
-export async function sendDuePaymentNotifications(payments = state.payments) {
+export async function sendDuePaymentNotifications() {
   const config = APP_CONFIG.notifications || {};
 
   if (!config.enabled) {
@@ -29,18 +28,12 @@ export async function sendDuePaymentNotifications(payments = state.payments) {
     throw new Error("Falta configurar APP_CONFIG.notifications.appsScriptUrl.");
   }
 
-  const duePayments = getDueNotificationPayments(payments);
-
-  if (!duePayments.length) {
-    return { ok: true, sent: false, count: 0, message: "No hay pagos pendientes que venzan hoy o manana." };
-  }
-
   const response = await fetch(config.appsScriptUrl, {
     method: "POST",
     headers: {
       "Content-Type": "text/plain;charset=utf-8"
     },
-    body: JSON.stringify(buildNotificationPayload(duePayments))
+    body: JSON.stringify(buildNotificationPayload())
   });
 
   const text = await response.text();
@@ -56,20 +49,18 @@ export async function sendDuePaymentNotifications(payments = state.payments) {
     throw new Error(result.error || `No se pudo enviar la alerta (${response.status}).`);
   }
 
-  return { ...result, count: result.count ?? duePayments.length };
+  return result;
 }
 
-export function buildNotificationPayload(payments) {
+export function buildNotificationPayload() {
   return {
     app: "Seguimiento de Pagos Musicala",
-    period: periodId(state.selectedYear, state.selectedMonth),
     triggeredBy: {
       email: state.user?.email || "",
       name: state.user?.displayName || state.user?.email || ""
     },
     token: APP_CONFIG.notifications?.token || "",
-    generatedAt: new Date().toISOString(),
-    payments
+    generatedAt: new Date().toISOString()
   };
 }
 

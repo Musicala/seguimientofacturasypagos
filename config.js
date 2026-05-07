@@ -19,7 +19,7 @@ export const APP_CONFIG = {
   },
   notifications: {
     enabled: true,
-    appsScriptUrl: "https://script.google.com/macros/s/AKfycbzAO3K-pVEdjhZLirygb3Xqz8I14V1YCfdAOyzUj9QzR-uf6A4puTYQIORPLWx0wrv_/exec",
+    appsScriptUrl: "https://script.google.com/macros/s/AKfycbzV5kgZjX5XiEWDwyBdPaiGsVy-WNzUhYQojtZ6cf5zvShiWQ6xqx9t3m02f0IGaZgi/exec",
     token: "PAYMENTS_NOTIFY_TOKEN",
     dueWindowDays: 1
   },
